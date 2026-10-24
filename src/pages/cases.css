@@ -1,0 +1,134 @@
+.cases-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.cases-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 14px;
+}
+
+.case-list-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.case-list {
+  flex: 1;
+  overflow: auto;
+  padding: 4px 8px 8px;
+}
+
+.case-item {
+  width: 100%;
+  display: block;
+  text-align: left;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  padding: 8px 10px;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.case-item:hover {
+  background: #f3eee2;
+}
+
+.case-item.on {
+  background: var(--teal-soft);
+  box-shadow: inset 3px 0 0 var(--teal);
+}
+
+.case-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.case-item-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.case-detail-col {
+  min-height: 0;
+  overflow: auto;
+}
+
+.case-tabs {
+  padding: 0 16px 16px;
+}
+
+.session-meta {
+  grid-template-columns: 76px 1fr 76px 1fr;
+  column-gap: 12px;
+  background: #f7f2e7;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.session-view .sub-title {
+  display: flex;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.transcript {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 420px;
+  overflow: auto;
+  padding: 10px;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+}
+
+.t-row {
+  max-width: 78%;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: var(--teal-soft);
+  font-size: 13px;
+}
+
+.t-row.right {
+  align-self: flex-end;
+  background: #fbf0dc;
+}
+
+.t-who {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.t-text {
+  white-space: pre-wrap;
+  line-height: 1.7;
+}
+
+.report {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 18px 14px;
+  margin-bottom: 12px;
+  background: #fffdf8;
+}

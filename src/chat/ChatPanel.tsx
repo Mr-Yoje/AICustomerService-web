@@ -6,6 +6,7 @@ import Markdown from 'react-markdown'
 import remarkBreaks from 'remark-breaks'
 import remarkGfm from 'remark-gfm'
 import type { Artifact, ChatRole } from '../api/types'
+import { HandoffPackage } from '../components/HandoffPackage'
 import { MODE_COLLECTION, MODE_HANDOFF } from '../api/types'
 import type { ChatMessage, ChatState, Speaker } from './reducer'
 
@@ -193,20 +194,6 @@ function Bubble({ m }: { m: ChatMessage }) {
           <div className="bubble-text">{m.text}</div>
         )}
       </div>
-    </div>
-  )
-}
-
-function HandoffPackage({ content }: { content: unknown }) {
-  const c = (content ?? {}) as Record<string, unknown>
-  return (
-    <div className="handoff-pkg">
-      {Object.entries(c).map(([k, v]) => (
-        <div key={k} className="pkg-row">
-          <div className="pkg-key">{k}</div>
-          <pre className="pkg-val">{typeof v === 'string' ? v : JSON.stringify(v, null, 2)}</pre>
-        </div>
-      ))}
     </div>
   )
 }

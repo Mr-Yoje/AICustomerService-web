@@ -1,6 +1,6 @@
 import { App, Input, Modal } from 'antd'
 import type { Dayjs } from 'dayjs'
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import { useCallback, useReducer, useRef, useState } from 'react'
 import { api, unwrap } from '../api/client'
 import { streamChat } from '../api/sse'
 import type { ChatRole } from '../api/types'
@@ -22,7 +22,7 @@ export function ChatPage() {
   const { message } = App.useApp()
   const [state, dispatch] = useReducer(chatReducer, initialChat)
   const [customerId, setCustomerId] = useState<string | null>(null)
-  const [role, setRole] = useState<ChatRole>('operator')
+  const [picked, setPicked] = useState<{ mode: string; role: ChatRole } | null>(null)
   const [simTime, setSimTime] = useState<Dayjs | null>(null)
   const [finishOpen, setFinishOpen] = useState(false)
   const [conclusion, setConclusion] = useState('')
@@ -37,7 +37,8 @@ export function ChatPage() {
     [state.sessionId, state.lastTurn],
   )
 
-  useEffect(() => setRole(DEFAULT_ROLE[state.mode] ?? 'operator'), [state.mode])
+  const role: ChatRole = picked?.mode === state.mode ? picked.role : (DEFAULT_ROLE[state.mode] ?? 'operator')
+  const setRole = (r: ChatRole) => setPicked({ mode: state.mode, role: r })
 
   const now = simTime ? simTime.format('YYYY-MM-DDTHH:mm:ss') : null
   const activeSession = state.mode === MODE_OPERATOR ? null : state.sessionId
