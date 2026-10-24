@@ -3,6 +3,7 @@ import { Button, Collapse, DatePicker, Input, Segmented, Tag, Tooltip } from 'an
 import type { Dayjs } from 'dayjs'
 import { useEffect, useRef, useState } from 'react'
 import Markdown from 'react-markdown'
+import remarkBreaks from 'remark-breaks'
 import remarkGfm from 'remark-gfm'
 import type { Artifact, ChatRole } from '../api/types'
 import { MODE_COLLECTION, MODE_HANDOFF } from '../api/types'
@@ -185,7 +186,7 @@ function Bubble({ m }: { m: ChatMessage }) {
         </div>
         {m.speaker === 'assistant' || m.pending ? (
           <div className="markdown bubble-text">
-            <Markdown remarkPlugins={[remarkGfm]}>{m.text || '…'}</Markdown>
+            <Markdown remarkPlugins={[remarkGfm, remarkBreaks]}>{m.text || '…'}</Markdown>
             {m.pending && <span className="caret" />}
           </div>
         ) : (

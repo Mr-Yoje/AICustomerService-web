@@ -120,7 +120,7 @@ function TurnSummary({ turn }: { turn: MainTurn }) {
             <dt>人工接管</dt>
             <dd>
               <span className="stamp" style={{ color: 'var(--vermilion)' }}>
-                已转人工
+                {turn.handoff_package_id ? '已转人工' : '处置：人工接管'}
               </span>
             </dd>
           </>

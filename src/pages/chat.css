@@ -1,8 +1,10 @@
 .chat-page {
   display: grid;
   grid-template-columns: 300px minmax(420px, 1fr) 340px;
+  grid-template-rows: minmax(0, 1fr);
   gap: 14px;
   height: 100%;
+  overflow: hidden;
   padding: 16px;
 }
 
@@ -152,6 +154,16 @@
 .bubble-text {
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.bubble-text.markdown {
+  white-space: normal;
+}
+
+.bubble-text.markdown ol,
+.bubble-text.markdown ul {
+  margin: 2px 0 4px;
+  padding-left: 20px;
 }
 
 .bubble-text.markdown p {
@@ -405,6 +417,9 @@
 @media (max-width: 1280px) {
   .chat-page {
     grid-template-columns: 260px 1fr;
+    grid-template-rows: calc(100vh - 32px) auto;
+    height: auto;
+    overflow: visible;
   }
 
   .trace-col {

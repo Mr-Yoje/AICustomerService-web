@@ -23,7 +23,8 @@
 
 html,
 body,
-#root {
+#root,
+#root > .ant-app {
   height: 100%;
   margin: 0;
 }
@@ -51,6 +52,7 @@ body {
 .app-shell {
   display: grid;
   grid-template-columns: 88px 1fr;
+  grid-template-rows: minmax(0, 1fr);
   height: 100%;
 }
 
