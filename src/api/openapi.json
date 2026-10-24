@@ -1,0 +1,2910 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "金融催收对话引擎",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/chat": {
+      "post": {
+        "tags": [
+          "对话"
+        ],
+        "summary": "Chat",
+        "operationId": "chat_api_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "SSE：trace / delta / replace / done / error；done 的 data 结构为 MainTurn（不含 trace）",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/MainTurn"
+                },
+                "itemSchema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "string"
+                    },
+                    "event": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "retry": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions/{session_id}/end": {
+      "post": {
+        "tags": [
+          "对话"
+        ],
+        "summary": "End Session",
+        "operationId": "end_session_api_sessions__session_id__end_post",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EndIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ok"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions/{session_id}/handoff/finish": {
+      "post": {
+        "tags": [
+          "对话"
+        ],
+        "summary": "Finish Handoff",
+        "operationId": "finish_handoff_api_sessions__session_id__handoff_finish_post",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinishIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ok"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customers": {
+      "get": {
+        "tags": [
+          "数据"
+        ],
+        "summary": "List Customers",
+        "operationId": "list_customers_api_customers_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Q"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomerBrief"
+                  },
+                  "title": "Response List Customers Api Customers Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/customers/{customer_id}": {
+      "get": {
+        "tags": [
+          "数据"
+        ],
+        "summary": "Get Customer",
+        "operationId": "get_customer_api_customers__customer_id__get",
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Customer Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions/{session_id}": {
+      "get": {
+        "tags": [
+          "数据"
+        ],
+        "summary": "Get Session",
+        "operationId": "get_session_api_sessions__session_id__get",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions/{session_id}/postcall/retry": {
+      "post": {
+        "tags": [
+          "数据"
+        ],
+        "summary": "Retry Postcall",
+        "operationId": "retry_postcall_api_sessions__session_id__postcall_retry_post",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetryIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PostTask"
+                  },
+                  "title": "Response Retry Postcall Api Sessions  Session Id  Postcall Retry Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cases": {
+      "get": {
+        "tags": [
+          "数据"
+        ],
+        "summary": "List Cases",
+        "operationId": "list_cases_api_cases_get",
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Customer Id"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CaseRow"
+                  },
+                  "title": "Response List Cases Api Cases Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cases/{case_id}": {
+      "get": {
+        "tags": [
+          "数据"
+        ],
+        "summary": "Get Case",
+        "operationId": "get_case_api_cases__case_id__get",
+        "parameters": [
+          {
+            "name": "case_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Case Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cases/{case_id}/archive": {
+      "post": {
+        "tags": [
+          "数据"
+        ],
+        "summary": "Archive Case",
+        "operationId": "archive_case_api_cases__case_id__archive_post",
+        "parameters": [
+          {
+            "name": "case_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Case Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseRow"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/artifacts/{artifact_id}": {
+      "get": {
+        "tags": [
+          "数据"
+        ],
+        "summary": "Get Artifact",
+        "operationId": "get_artifact_api_artifacts__artifact_id__get",
+        "parameters": [
+          {
+            "name": "artifact_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Artifact Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Artifact"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/audit": {
+      "get": {
+        "tags": [
+          "数据"
+        ],
+        "summary": "List Audit",
+        "operationId": "list_audit_api_audit_get",
+        "parameters": [
+          {
+            "name": "rule_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Rule Id"
+            }
+          },
+          {
+            "name": "checkpoint",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Checkpoint"
+            }
+          },
+          {
+            "name": "customer_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Customer Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 500,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AuditRow"
+                  },
+                  "title": "Response List Audit Api Audit Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/audit/export": {
+      "get": {
+        "tags": [
+          "数据"
+        ],
+        "summary": "Export Audit",
+        "operationId": "export_audit_api_audit_export_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/csv": {}
+            }
+          }
+        }
+      }
+    },
+    "/api/memory/{scope}/{owner_id}": {
+      "get": {
+        "tags": [
+          "数据"
+        ],
+        "summary": "Get Memory",
+        "operationId": "get_memory_api_memory__scope___owner_id__get",
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Scope"
+            }
+          },
+          {
+            "name": "owner_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Owner Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/MemoryItem"
+                  },
+                  "title": "Response Get Memory Api Memory  Scope   Owner Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/memory/{scope}/{owner_id}/{key}": {
+      "put": {
+        "tags": [
+          "数据"
+        ],
+        "summary": "Correct Memory",
+        "operationId": "correct_memory_api_memory__scope___owner_id___key__put",
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Scope"
+            }
+          },
+          {
+            "name": "owner_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Owner Id"
+            }
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemoryValue"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ok"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "数据"
+        ],
+        "summary": "Clear Memory",
+        "operationId": "clear_memory_api_memory__scope___owner_id___key__delete",
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Scope"
+            }
+          },
+          {
+            "name": "owner_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Owner Id"
+            }
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key"
+            }
+          },
+          {
+            "name": "operator",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "运营",
+              "title": "Operator"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ok"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/config": {
+      "get": {
+        "tags": [
+          "配置"
+        ],
+        "summary": "List Config",
+        "operationId": "list_config_api_config_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ConfigBrief"
+                  },
+                  "type": "array",
+                  "title": "Response List Config Api Config Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/config/{kind}/{key}": {
+      "get": {
+        "tags": [
+          "配置"
+        ],
+        "summary": "Get Config",
+        "operationId": "get_config_api_config__kind___key__get",
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigDoc"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "配置"
+        ],
+        "summary": "Save Config",
+        "operationId": "save_config_api_config__kind___key__put",
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigDoc"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "校验失败，detail.errors 为错误清单"
+          }
+        }
+      }
+    },
+    "/api/config/{kind}/{key}/versions": {
+      "get": {
+        "tags": [
+          "配置"
+        ],
+        "summary": "Config Versions",
+        "operationId": "config_versions_api_config__kind___key__versions_get",
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConfigVersion"
+                  },
+                  "title": "Response Config Versions Api Config  Kind   Key  Versions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/config/business_pack/{key}/copy": {
+      "post": {
+        "tags": [
+          "配置"
+        ],
+        "summary": "Copy Pack",
+        "operationId": "copy_pack_api_config_business_pack__key__copy_post",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CopyIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigDoc"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "校验失败"
+          }
+        }
+      }
+    },
+    "/api/rules": {
+      "get": {
+        "tags": [
+          "配置"
+        ],
+        "summary": "List Rules",
+        "operationId": "list_rules_api_rules_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RuleRow"
+                  },
+                  "type": "array",
+                  "title": "Response List Rules Api Rules Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/templates": {
+      "get": {
+        "tags": [
+          "配置"
+        ],
+        "summary": "List Templates",
+        "operationId": "list_templates_api_templates_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TemplateRow"
+                  },
+                  "type": "array",
+                  "title": "Response List Templates Api Templates Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/registry": {
+      "get": {
+        "tags": [
+          "配置"
+        ],
+        "summary": "Registry",
+        "operationId": "registry_api_registry_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RegistryGroup"
+                  },
+                  "type": "array",
+                  "title": "Response Registry Api Registry Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Artifact": {
+        "properties": {
+          "artifact_id": {
+            "type": "string",
+            "title": "Artifact Id"
+          },
+          "case_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Case Id"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "content": {
+            "title": "Content"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "archived": {
+            "type": "integer",
+            "title": "Archived"
+          }
+        },
+        "type": "object",
+        "required": [
+          "artifact_id",
+          "case_id",
+          "session_id",
+          "kind",
+          "content",
+          "created_at",
+          "archived"
+        ],
+        "title": "Artifact"
+      },
+      "AuditRow": {
+        "properties": {
+          "log_id": {
+            "type": "string",
+            "title": "Log Id"
+          },
+          "ts": {
+            "type": "string",
+            "title": "Ts"
+          },
+          "customer_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Id"
+          },
+          "checkpoint": {
+            "type": "string",
+            "title": "Checkpoint"
+          },
+          "scene": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scene"
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content"
+          },
+          "rule_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Id"
+          },
+          "rule_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Type"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Level"
+          },
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action"
+          },
+          "handoff": {
+            "type": "integer",
+            "title": "Handoff"
+          },
+          "config_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Config Version"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "log_id",
+          "ts",
+          "customer_id",
+          "checkpoint",
+          "scene",
+          "content",
+          "rule_id",
+          "rule_type",
+          "level",
+          "action",
+          "handoff",
+          "config_version",
+          "session_id"
+        ],
+        "title": "AuditRow"
+      },
+      "CaseDetail": {
+        "properties": {
+          "case": {
+            "$ref": "#/components/schemas/CaseRow"
+          },
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/SessionRow"
+            },
+            "type": "array",
+            "title": "Sessions"
+          },
+          "artifacts": {
+            "items": {
+              "$ref": "#/components/schemas/Artifact"
+            },
+            "type": "array",
+            "title": "Artifacts"
+          },
+          "todos": {
+            "items": {
+              "$ref": "#/components/schemas/Todo"
+            },
+            "type": "array",
+            "title": "Todos"
+          }
+        },
+        "type": "object",
+        "required": [
+          "case",
+          "sessions",
+          "artifacts",
+          "todos"
+        ],
+        "title": "CaseDetail"
+      },
+      "CaseRow": {
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "title": "Case Id"
+          },
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "pack_id": {
+            "type": "string",
+            "title": "Pack Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "case_id",
+          "customer_id",
+          "pack_id",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "CaseRow"
+      },
+      "ChatIn": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "default": ""
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role"
+          },
+          "customer_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Id"
+          },
+          "now": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Now"
+          }
+        },
+        "type": "object",
+        "title": "ChatIn"
+      },
+      "CheckResult": {
+        "properties": {
+          "checkpoint": {
+            "type": "string",
+            "title": "Checkpoint"
+          },
+          "passed": {
+            "type": "boolean",
+            "title": "Passed"
+          },
+          "hits": {
+            "items": {
+              "$ref": "#/components/schemas/RuleHit"
+            },
+            "type": "array",
+            "title": "Hits",
+            "default": []
+          },
+          "block": {
+            "type": "boolean",
+            "title": "Block",
+            "default": false
+          },
+          "handoff": {
+            "type": "boolean",
+            "title": "Handoff",
+            "default": false
+          },
+          "degraded": {
+            "type": "boolean",
+            "title": "Degraded",
+            "default": false
+          },
+          "signals": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Signals",
+            "default": []
+          },
+          "next_allowed": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Allowed"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "checkpoint",
+          "passed"
+        ],
+        "title": "CheckResult"
+      },
+      "ConfigBrief": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "key",
+          "version"
+        ],
+        "title": "ConfigBrief"
+      },
+      "ConfigDoc": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "content": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "key",
+          "version",
+          "content"
+        ],
+        "title": "ConfigDoc"
+      },
+      "ConfigVersion": {
+        "properties": {
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "content": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "version",
+          "created_at",
+          "content"
+        ],
+        "title": "ConfigVersion"
+      },
+      "CopyIn": {
+        "properties": {
+          "new_key": {
+            "type": "string",
+            "title": "New Key"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "new_key",
+          "name"
+        ],
+        "title": "CopyIn"
+      },
+      "CustomerBrief": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "customer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Name"
+          },
+          "age": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age"
+          },
+          "occupation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Occupation"
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region"
+          },
+          "customer_level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Level"
+          },
+          "credit_score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credit Score"
+          },
+          "monthly_income": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Monthly Income"
+          },
+          "overdue_count": {
+            "type": "integer",
+            "title": "Overdue Count"
+          },
+          "overdue_amount": {
+            "type": "number",
+            "title": "Overdue Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "customer_name",
+          "age",
+          "occupation",
+          "region",
+          "customer_level",
+          "credit_score",
+          "monthly_income",
+          "overdue_count",
+          "overdue_amount"
+        ],
+        "title": "CustomerBrief"
+      },
+      "CustomerDetail": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "profile": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Profile"
+          },
+          "behaviors": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Behaviors"
+          },
+          "emotions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Emotions"
+          },
+          "repayments": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Repayments"
+          },
+          "memory": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Memory"
+          },
+          "overdues": {
+            "$ref": "#/components/schemas/LoanPriority"
+          },
+          "willingness": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Willingness"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "open_session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Open Session Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "profile",
+          "behaviors",
+          "emotions",
+          "repayments",
+          "memory",
+          "overdues",
+          "willingness",
+          "open_session_id"
+        ],
+        "title": "CustomerDetail"
+      },
+      "EndIn": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "title": "Reason",
+            "default": "运营结束"
+          },
+          "now": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Now"
+          }
+        },
+        "type": "object",
+        "title": "EndIn"
+      },
+      "Factor": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "weight": {
+            "type": "number",
+            "title": "Weight"
+          },
+          "contribution": {
+            "type": "number",
+            "title": "Contribution"
+          },
+          "evidence": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence",
+            "default": []
+          },
+          "note": {
+            "type": "string",
+            "title": "Note",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "score",
+          "weight",
+          "contribution"
+        ],
+        "title": "Factor"
+      },
+      "FinishIn": {
+        "properties": {
+          "conclusion": {
+            "type": "string",
+            "title": "Conclusion"
+          },
+          "now": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Now"
+          }
+        },
+        "type": "object",
+        "required": [
+          "conclusion"
+        ],
+        "title": "FinishIn"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "LoanItem": {
+        "properties": {
+          "overdue_id": {
+            "type": "string",
+            "title": "Overdue Id"
+          },
+          "loan_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Loan Id"
+          },
+          "loan_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Loan Type"
+          },
+          "overdue_amount": {
+            "type": "number",
+            "title": "Overdue Amount"
+          },
+          "overdue_days": {
+            "type": "integer",
+            "title": "Overdue Days"
+          },
+          "overdue_periods": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overdue Periods"
+          },
+          "last_repay_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Repay Date"
+          },
+          "recommended_template_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recommended Template Id"
+          },
+          "owner_conflict": {
+            "type": "boolean",
+            "title": "Owner Conflict"
+          }
+        },
+        "type": "object",
+        "required": [
+          "overdue_id",
+          "loan_id",
+          "loan_type",
+          "overdue_amount",
+          "overdue_days",
+          "overdue_periods",
+          "last_repay_date",
+          "recommended_template_id",
+          "owner_conflict"
+        ],
+        "title": "LoanItem"
+      },
+      "LoanPriority": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LoanItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total_amount": {
+            "type": "number",
+            "title": "Total Amount"
+          },
+          "suggestion": {
+            "type": "string",
+            "title": "Suggestion"
+          },
+          "basis": {
+            "type": "string",
+            "title": "Basis"
+          },
+          "conflicts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Conflicts",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "items",
+          "total_amount",
+          "suggestion",
+          "basis"
+        ],
+        "title": "LoanPriority"
+      },
+      "MainTurn": {
+        "properties": {
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode",
+            "default": "运营模式"
+          },
+          "speaker": {
+            "type": "string",
+            "title": "Speaker"
+          },
+          "speaker_method": {
+            "type": "string",
+            "title": "Speaker Method",
+            "default": ""
+          },
+          "system_intent": {
+            "type": "string",
+            "title": "System Intent"
+          },
+          "reply": {
+            "type": "string",
+            "title": "Reply"
+          },
+          "customer_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Id"
+          },
+          "hit_rules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Hit Rules",
+            "default": []
+          },
+          "compliance": {
+            "items": {
+              "$ref": "#/components/schemas/CheckResult"
+            },
+            "type": "array",
+            "title": "Compliance",
+            "default": []
+          },
+          "willingness_score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Willingness Score"
+          },
+          "willingness_level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Willingness Level"
+          },
+          "strategy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Strategy"
+          },
+          "handoff": {
+            "type": "boolean",
+            "title": "Handoff",
+            "default": false
+          },
+          "handoff_package_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Handoff Package Id"
+          },
+          "needs_review": {
+            "type": "boolean",
+            "title": "Needs Review",
+            "default": false
+          },
+          "review_reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Review Reasons",
+            "default": []
+          },
+          "key_points": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Key Points",
+            "default": []
+          },
+          "trace_id": {
+            "type": "string",
+            "title": "Trace Id",
+            "default": ""
+          },
+          "trace": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Trace",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "speaker",
+          "system_intent",
+          "reply"
+        ],
+        "title": "MainTurn"
+      },
+      "MemoryItem": {
+        "properties": {
+          "value": {
+            "title": "Value"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value",
+          "source",
+          "updated_at"
+        ],
+        "title": "MemoryItem"
+      },
+      "MemoryValue": {
+        "properties": {
+          "value": {
+            "title": "Value"
+          },
+          "operator": {
+            "type": "string",
+            "title": "Operator",
+            "default": "运营"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "title": "MemoryValue"
+      },
+      "Message": {
+        "properties": {
+          "turn": {
+            "type": "integer",
+            "title": "Turn"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "meta": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Meta"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "turn",
+          "role",
+          "text",
+          "meta",
+          "created_at"
+        ],
+        "title": "Message"
+      },
+      "Ok": {
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "title": "Ok",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "Ok"
+      },
+      "PostTask": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "stage": {
+            "type": "integer",
+            "title": "Stage"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "attempts": {
+            "type": "integer",
+            "title": "Attempts"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session_id",
+          "name",
+          "stage",
+          "status",
+          "attempts",
+          "error",
+          "updated_at"
+        ],
+        "title": "PostTask"
+      },
+      "RegistryGroup": {
+        "properties": {
+          "owner": {
+            "type": "string",
+            "title": "Owner"
+          },
+          "items": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "owner",
+          "items"
+        ],
+        "title": "RegistryGroup"
+      },
+      "RetryIn": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "title": "RetryIn"
+      },
+      "RuleHit": {
+        "properties": {
+          "rule_id": {
+            "type": "string",
+            "title": "Rule Id"
+          },
+          "rule_type": {
+            "type": "string",
+            "title": "Rule Type"
+          },
+          "rule_content": {
+            "type": "string",
+            "title": "Rule Content"
+          },
+          "level": {
+            "type": "string",
+            "title": "Level"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "method": {
+            "type": "string",
+            "title": "Method"
+          },
+          "evidence": {
+            "type": "string",
+            "title": "Evidence"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence",
+            "default": 1.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "rule_id",
+          "rule_type",
+          "rule_content",
+          "level",
+          "action",
+          "method",
+          "evidence"
+        ],
+        "title": "RuleHit"
+      },
+      "RuleRow": {
+        "properties": {
+          "rule_id": {
+            "type": "string",
+            "title": "Rule Id"
+          },
+          "rule_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Type"
+          },
+          "rule_content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Content"
+          },
+          "violation_level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Violation Level"
+          },
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action"
+          },
+          "checkpoints": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Checkpoints"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rule_id",
+          "rule_type",
+          "rule_content",
+          "violation_level",
+          "action",
+          "checkpoints"
+        ],
+        "title": "RuleRow"
+      },
+      "SaveIn": {
+        "properties": {
+          "content": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "content"
+        ],
+        "title": "SaveIn"
+      },
+      "SessionDetail": {
+        "properties": {
+          "session": {
+            "$ref": "#/components/schemas/SessionRow"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/Message"
+            },
+            "type": "array",
+            "title": "Messages"
+          },
+          "memory": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/MemoryItem"
+            },
+            "type": "object",
+            "title": "Memory"
+          },
+          "handoff": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Artifact"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "postcall": {
+            "items": {
+              "$ref": "#/components/schemas/PostTask"
+            },
+            "type": "array",
+            "title": "Postcall"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session",
+          "messages",
+          "memory",
+          "handoff",
+          "postcall"
+        ],
+        "title": "SessionDetail"
+      },
+      "SessionRow": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "case_id": {
+            "type": "string",
+            "title": "Case Id"
+          },
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode"
+          },
+          "pack_id": {
+            "type": "string",
+            "title": "Pack Id"
+          },
+          "config_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Config Version"
+          },
+          "channel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Channel"
+          },
+          "started_at": {
+            "type": "string",
+            "title": "Started At"
+          },
+          "ended_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ended At"
+          },
+          "end_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session_id",
+          "case_id",
+          "customer_id",
+          "mode",
+          "pack_id",
+          "config_version",
+          "channel",
+          "started_at",
+          "ended_at",
+          "end_reason"
+        ],
+        "title": "SessionRow"
+      },
+      "TemplateRow": {
+        "properties": {
+          "template_id": {
+            "type": "string",
+            "title": "Template Id"
+          },
+          "template_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Template Type"
+          },
+          "max_periods": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Periods"
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate"
+          },
+          "fee": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fee"
+          },
+          "condition": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Condition"
+          },
+          "cond": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Cond"
+          }
+        },
+        "type": "object",
+        "required": [
+          "template_id",
+          "template_type",
+          "max_periods",
+          "rate",
+          "fee",
+          "condition",
+          "cond"
+        ],
+        "title": "TemplateRow"
+      },
+      "Todo": {
+        "properties": {
+          "todo_id": {
+            "type": "string",
+            "title": "Todo Id"
+          },
+          "case_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Case Id"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "due": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "todo_id",
+          "case_id",
+          "session_id",
+          "kind",
+          "content",
+          "due",
+          "status",
+          "created_at"
+        ],
+        "title": "Todo"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "Willingness": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "score": {
+            "type": "integer",
+            "title": "Score"
+          },
+          "level": {
+            "type": "string",
+            "title": "Level"
+          },
+          "factors": {
+            "items": {
+              "$ref": "#/components/schemas/Factor"
+            },
+            "type": "array",
+            "title": "Factors"
+          },
+          "adjustments": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Adjustments",
+            "default": []
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "needs_review": {
+            "type": "boolean",
+            "title": "Needs Review"
+          },
+          "review_reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Review Reasons",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "score",
+          "level",
+          "factors",
+          "confidence",
+          "needs_review"
+        ],
+        "title": "Willingness"
+      }
+    }
+  }
+}
