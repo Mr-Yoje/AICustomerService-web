@@ -16,19 +16,20 @@
   AICustomerService-web/      # 本仓库
 ```
 
-## 运行
+## 启动
+
+日常启动在后端仓库根目录执行 `.\start.ps1`。它会安装依赖、打包本仓库，并在 http://127.0.0.1:8000 打开前后端。环境、数据库和公开测评的步骤见后端仓库 `README.md`。
+
+只打包前端：
 
 ```powershell
 npm install
-npm run build          # 输出 dist/，后端启动时自动托管
+npm run build          # 输出 dist/，由后端托管
 ```
 
-一键启动请在后端仓库根目录执行 `.\start.ps1`（会先打包本仓库），然后访问 `http://127.0.0.1:8000`。
-
-开发模式（热更新，`/api` 代理到后端）：
+开发模式（热更新，`/api` 代理到后端）。先在后端仓库的 `backend` 目录执行 `python scripts/serve.py --port 8000`，再在本仓库执行：
 
 ```powershell
-# 先在后端仓库启动：python backend/scripts/serve.py --port 8000
 npm run dev            # 访问 http://127.0.0.1:5173；可用环境变量 API_TARGET 指定后端地址
 ```
 
