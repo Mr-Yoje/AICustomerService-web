@@ -1,0 +1,146 @@
+.admin-grid {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.admin-nav {
+  padding: 8px;
+  position: sticky;
+  top: 0;
+}
+
+.admin-nav-group {
+  font-size: 11.5px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  padding: 8px 10px 4px;
+}
+
+.admin-main {
+  min-width: 0;
+}
+
+.pack-cards {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.pack-card {
+  text-align: left;
+  border: 1px solid var(--line);
+  background: var(--card);
+  border-radius: 10px;
+  padding: 8px 14px;
+  min-width: 180px;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.pack-card.on {
+  border-color: var(--teal);
+  box-shadow: inset 0 -3px 0 var(--teal);
+}
+
+.pack-card-name {
+  font-family: var(--serif);
+  font-weight: 600;
+}
+
+.form-section {
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  padding: 10px 14px 12px;
+  margin-bottom: 12px;
+}
+
+.form-section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--serif);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.field {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 5px 0;
+  font-size: 13px;
+}
+
+.field-label {
+  color: var(--muted);
+  padding-top: 5px;
+}
+
+.field-control {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-width: 720px;
+}
+
+.field-control > .ant-input-number,
+.field-control > .ant-switch {
+  align-self: flex-start;
+}
+
+.field-help {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.inline-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.weights {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.weights .field {
+  grid-template-columns: 96px 1fr;
+}
+
+.yaml-editor {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.yaml-view {
+  max-height: 60vh;
+  overflow: auto;
+}
+
+.error-list {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+
+.schema-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.schema-pair pre {
+  max-height: 280px;
+  overflow: auto;
+  background: #f7f2e7;
+  padding: 8px;
+  border-radius: 6px;
+}
