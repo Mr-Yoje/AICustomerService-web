@@ -1,53 +1,54 @@
-import { SearchOutlined } from '@ant-design/icons'
-import { Empty, Input, Progress, Skeleton, Tag, Tooltip } from 'antd'
-import { useState } from 'react'
+import { Empty, Progress, Select, Skeleton, Tag, Tooltip } from 'antd'
 import { api, unwrap } from '../api/client'
-import type { CustomerDetail } from '../api/types'
+import type { CustomerBrief, CustomerDetail } from '../api/types'
 import { levelColor, money } from '../lib/format'
 import { useLoad } from '../lib/useLoad'
 
 interface Props {
   selected: string | null
-  onSelect: (customerId: string) => void
+  onSelect: (customerId: string | null) => void
   detail: CustomerDetail | undefined
   loading: boolean
 }
 
 export function CustomerPanel({ selected, onSelect, detail, loading }: Props) {
-  const [q, setQ] = useState('')
-  const list = useLoad(() => unwrap(api.GET('/api/customers', { params: { query: { q } } })), [q])
+  const list = useLoad(() => unwrap(api.GET('/api/customers', { params: { query: { q: '' } } })), [])
+  const customers = list.data ?? []
 
   return (
-    <div className="customer-col">
+    <>
       <div className="panel">
         <div className="panel-head">
           <span className="label">客户</span>
           <span className="mono" style={{ color: 'var(--muted)', fontSize: 12 }}>
-            {list.data?.length ?? 0} 位
+            {customers.length} 位
           </span>
         </div>
-        <div className="panel-body" style={{ paddingBottom: 8 }}>
-          <Input
+        <div className="panel-body" style={{ paddingBottom: 12 }}>
+          <Select
+            showSearch
             allowClear
-            prefix={<SearchOutlined />}
-            placeholder="编号 / 职业 / 地区"
-            onChange={(e) => setQ(e.target.value)}
+            value={selected}
+            placeholder="搜索编号 / 职业 / 地区"
+            loading={list.loading}
+            className="customer-select"
+            classNames={{ popup: { root: 'customer-select-popup' } }}
+            options={customers.map((c) => ({
+              value: c.customer_id,
+              label: `${c.customer_id} ${c.occupation ?? ''} ${c.region ?? ''} ${c.customer_name ?? ''}`,
+            }))}
+            optionRender={(option) => {
+              const customer = customers.find((item) => item.customer_id === option.value)
+              return customer ? <CustomerOption customer={customer} /> : option.label
+            }}
+            labelRender={(option) => {
+              const customer = customers.find((item) => item.customer_id === option.value)
+              return customer ? <CustomerOption customer={customer} compact /> : option.label
+            }}
+            filterOption={(input, option) => String(option?.label ?? '').toLowerCase().includes(input.trim().toLowerCase())}
+            notFoundContent={<Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="没有匹配的客户" />}
+            onChange={(value) => onSelect(value ?? null)}
           />
-        </div>
-        <div className="customer-list">
-          {list.data?.map((c) => (
-            <button
-              key={c.customer_id}
-              className={`customer-item ${selected === c.customer_id ? 'on' : ''}`}
-              onClick={() => onSelect(c.customer_id)}
-            >
-              <span className="mono cid">{c.customer_id}</span>
-              <span className="meta">
-                {c.occupation} · {c.region}
-              </span>
-              <span className="mono owe">{c.overdue_count ? money(c.overdue_amount) : '无逾期'}</span>
-            </button>
-          ))}
         </div>
       </div>
 
@@ -57,12 +58,24 @@ export function CustomerPanel({ selected, onSelect, detail, loading }: Props) {
           {detail && <span className="mono">{detail.customer_id}</span>}
         </div>
         <div className="panel-body">
-          {!selected && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="从上方选择客户" />}
+          {!selected && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="从下拉框选择客户" />}
           {selected && loading && !detail && <Skeleton active />}
           {detail && <CustomerCard detail={detail} />}
         </div>
       </div>
-    </div>
+    </>
+  )
+}
+
+function CustomerOption({ customer, compact = false }: { customer: CustomerBrief; compact?: boolean }) {
+  return (
+    <span className={`customer-option ${compact ? 'compact' : ''}`}>
+      <span className="mono cid">{customer.customer_id}</span>
+      <span className="meta">
+        {customer.occupation} · {customer.region}
+      </span>
+      {!compact && <span className="mono owe">{customer.overdue_count ? money(customer.overdue_amount) : '无逾期'}</span>}
+    </span>
   )
 }
 

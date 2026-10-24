@@ -89,6 +89,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Sessions */
+        get: operations["list_sessions_api_sessions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/sessions/{session_id}": {
         parameters: {
             query?: never;
@@ -731,6 +748,8 @@ export interface components {
             handoff: boolean;
             /** Handoff Package Id */
             handoff_package_id?: string | null;
+            /** End Reason */
+            end_reason?: string | null;
             /**
              * Needs Review
              * @default false
@@ -888,6 +907,31 @@ export interface components {
             handoff: components["schemas"]["Artifact"] | null;
             /** Postcall */
             postcall: components["schemas"]["PostTask"][];
+        };
+        /** SessionListItem */
+        SessionListItem: {
+            /** Session Id */
+            session_id: string;
+            /** Case Id */
+            case_id: string;
+            /** Customer Id */
+            customer_id: string;
+            /** Mode */
+            mode: string;
+            /** Pack Id */
+            pack_id: string;
+            /** Config Version */
+            config_version: string | null;
+            /** Channel */
+            channel: string | null;
+            /** Started At */
+            started_at: string;
+            /** Ended At */
+            ended_at: string | null;
+            /** End Reason */
+            end_reason: string | null;
+            /** Resumable */
+            resumable: boolean;
         };
         /** SessionRow */
         SessionRow: {
@@ -1151,6 +1195,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CustomerDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_sessions_api_sessions_get: {
+        parameters: {
+            query?: {
+                customer_id?: string;
+                status?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionListItem"][];
                 };
             };
             /** @description Validation Error */

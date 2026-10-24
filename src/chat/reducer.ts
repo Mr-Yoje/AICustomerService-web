@@ -1,8 +1,8 @@
 import type { ChatRole, MainTurn, TraceEvent } from '../api/types'
-import { MODE_HANDOFF, MODE_OPERATOR } from '../api/types'
+import { MODE_COLLECTION, MODE_HANDOFF, MODE_OPERATOR } from '../api/types'
 import type { SSEMessage } from '../api/sse'
 
-/** assistant 为主控对运营的回答；agent 为 AI 坐席对客户的回复 */
+/** assistant 为对运营的回答（查询与合规由运营子 Agent 生成，路由与结束催收由主控生成）；agent 为 AI 坐席对客户的回复 */
 export type Speaker = 'operator' | 'customer' | 'agent' | 'human_agent' | 'assistant' | 'system'
 
 export interface ChatMessage {
@@ -12,6 +12,8 @@ export interface ChatMessage {
   pending?: boolean
   replaced?: boolean
   error?: boolean
+  /** 与 turn 同属这一轮；只有 AI 坐席回复在界面上展开 */
+  trace?: TraceEvent[]
   turn?: MainTurn
 }
 
@@ -23,6 +25,8 @@ export interface ChatState {
   lastTurn: MainTurn | null
   busy: boolean
   nextId: number
+  readOnly: boolean
+  readOnlyReason: string
 }
 
 export const initialChat: ChatState = {
@@ -33,14 +37,17 @@ export const initialChat: ChatState = {
   lastTurn: null,
   busy: false,
   nextId: 1,
+  readOnly: false,
+  readOnlyReason: '',
 }
 
 export type ChatAction =
   | { type: 'send'; role: ChatRole; text: string }
   | { type: 'event'; msg: SSEMessage }
   | { type: 'fail'; message: string }
-  | { type: 'session'; sessionId: string | null; mode: string }
+  | { type: 'session'; sessionId: string | null; mode: string; readOnly?: boolean; readOnlyReason?: string }
   | { type: 'notice'; text: string }
+  | { type: 'load'; sessionId: string; mode: string; readOnly: boolean; readOnlyReason: string; messages: ChatMessage[] }
   | { type: 'reset' }
 
 function updateReply(state: ChatState, patch: (m: ChatMessage) => ChatMessage): ChatState {
@@ -58,8 +65,15 @@ function humanSent(turn: MainTurn): boolean {
   return turn.speaker === 'agent' && turn.mode === MODE_HANDOFF && turn.hit_rules.length === 0
 }
 
+/** 发给客户的 AI 坐席回复，含发起催收后的开场白（主控以运营身份发起，模式已切入催收对话）。 */
+export function isSeatReply(turn: MainTurn): boolean {
+  if (turn.mode === MODE_COLLECTION && turn.speaker === 'operator') return true
+  if (turn.speaker === 'customer') return !(turn.mode === MODE_HANDOFF && !turn.handoff)
+  return false
+}
+
 function replySpeaker(turn: MainTurn): Speaker {
-  if (turn.speaker === 'customer') return turn.mode === MODE_HANDOFF && !turn.handoff ? 'system' : 'agent'
+  if (isSeatReply(turn)) return 'agent'
   return humanSent(turn) ? 'system' : 'assistant'
 }
 
@@ -75,13 +89,16 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
         messages: [
           ...state.messages,
           { id, speaker: action.role, text: action.text },
-          { id: id + 1, speaker: 'system', text: '', pending: true },
+          { id: id + 1, speaker: 'system', text: '', pending: true, trace: [] },
         ],
       }
     }
     case 'event': {
       const { event, data } = action.msg
-      if (event === 'trace') return { ...state, trace: [...state.trace, data as TraceEvent] }
+      if (event === 'trace') {
+        const ev = data as TraceEvent
+        return updateReply({ ...state, trace: [...state.trace, ev] }, (m) => ({ ...m, trace: [...(m.trace ?? []), ev] }))
+      }
       if (event === 'delta') return updateReply(state, (m) => ({ ...m, text: m.text + (data as { text: string }).text }))
       if (event === 'replace')
         return updateReply(state, (m) => ({ ...m, text: (data as { text: string }).text, replaced: true }))
@@ -110,11 +127,27 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
       return { ...next, busy: false }
     }
     case 'session':
-      return { ...state, sessionId: action.sessionId, mode: action.mode }
+      return {
+        ...state,
+        sessionId: action.sessionId,
+        mode: action.mode,
+        readOnly: action.readOnly ?? false,
+        readOnlyReason: action.readOnlyReason ?? '',
+      }
     case 'notice': {
       const id = state.nextId
       return { ...state, nextId: id + 1, messages: [...state.messages, { id, speaker: 'system', text: action.text }] }
     }
+    case 'load':
+      return {
+        ...initialChat,
+        sessionId: action.sessionId,
+        mode: action.mode,
+        readOnly: action.readOnly,
+        readOnlyReason: action.readOnlyReason,
+        messages: action.messages,
+        nextId: action.messages.length + 1,
+      }
     case 'reset':
       return initialChat
   }

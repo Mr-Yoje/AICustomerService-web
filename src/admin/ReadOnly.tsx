@@ -1,5 +1,6 @@
 import { Collapse, Table, Tag } from 'antd'
 import type { RegistryGroup, RuleRow, TemplateRow } from '../api/types'
+import { ownerLabel } from '../lib/agents'
 
 const LEVEL_COLOR: Record<string, string> = { 严重: 'red', 中等: 'orange', 轻微: 'gold' }
 
@@ -82,22 +83,18 @@ export function TemplatesView({ templates }: { templates: TemplateRow[] | undefi
 
 type Item = { name: string; kind: string; description?: string; timeout_s?: number; retries?: number; input?: unknown; output?: unknown }
 
-function ownerLabel(owner: string) {
-  return owner === 'main' ? '主控 Agent' : `催收子 Agent · ${owner.replace('collection:', '')}`
-}
-
 export function RegistryView({ groups }: { groups: RegistryGroup[] | undefined }) {
   return (
     <div className="panel">
       <div className="panel-head">
         <span className="label">工具注册表</span>
         <span className="hint" style={{ margin: 0 }}>
-          主控与各业务包子 Agent 的工具（tool）和 Skill 契约，分开注册；展开行查看输入输出结构
+          主控、运营子 Agent 与各业务包催收子 Agent 的工具（tool）和 Skill 契约，分开注册；展开行查看输入输出结构
         </span>
       </div>
       <div className="panel-body">
         <Collapse
-          defaultActiveKey={['main']}
+          defaultActiveKey={['ops']}
           items={(groups ?? []).map((g) => ({
             key: g.owner,
             label: (

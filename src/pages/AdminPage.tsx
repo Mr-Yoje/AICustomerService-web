@@ -97,7 +97,7 @@ function Packs({ rules, registry }: { rules: { rule_id: string; rule_type: strin
   const opts: PackFormOptions = useMemo(
     () => ({
       rules: (rules ?? []).map((r) => ({ value: r.rule_id, label: `${r.rule_id} ${r.rule_type ?? ''}` })),
-      tools: (registry?.find((g) => g.owner === 'main')?.items ?? []).filter((i) => i.kind === 'tool').map((i) => String(i.name)),
+      tools: (registry?.find((g) => g.owner === 'ops')?.items ?? []).filter((i) => i.kind === 'tool').map((i) => String(i.name)),
       emotions: ((emotions.data?.content as { emotions?: string[] } | undefined)?.emotions ?? []) as string[],
     }),
     [rules, registry, emotions.data],

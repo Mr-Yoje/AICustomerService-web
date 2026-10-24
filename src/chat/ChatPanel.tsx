@@ -2,6 +2,7 @@ import { SendOutlined } from '@ant-design/icons'
 import { Button, Collapse, DatePicker, Input, Segmented, Tag, Tooltip } from 'antd'
 import type { Dayjs } from 'dayjs'
 import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router'
 import Markdown from 'react-markdown'
 import remarkBreaks from 'remark-breaks'
 import remarkGfm from 'remark-gfm'
@@ -9,6 +10,9 @@ import type { Artifact, ChatRole } from '../api/types'
 import { HandoffPackage } from '../components/HandoffPackage'
 import { MODE_COLLECTION, MODE_HANDOFF } from '../api/types'
 import type { ChatMessage, ChatState, Speaker } from './reducer'
+import { AgentTrace } from './TracePanel'
+import { handledByOps } from '../lib/agents'
+import { foldTraces, latestAgentTraceId } from './traceFold'
 
 const SPEAKER_LABEL: Record<Speaker, string> = {
   operator: '运营',
@@ -57,7 +61,41 @@ export function ChatPanel(props: Props) {
   const { state, customerId, role, onRole, simTime, onSimTime, onSend, onStart, onEnd, onFinishHandoff, handoff } = props
   const [text, setText] = useState('')
   const bottom = useRef<HTMLDivElement>(null)
+  const latest = latestAgentTraceId(state.messages, state.mode)
+  const latestPending = Boolean(state.messages.find((m) => m.id === latest)?.pending)
+  const [openTraces, setOpenTraces] = useState<Set<number>>(new Set())
+  const prevTrace = useRef<{ id: number | null; pending: boolean }>({ id: null, pending: false })
+  if (prevTrace.current.id !== latest || prevTrace.current.pending !== latestPending) {
+    const next = foldTraces(openTraces, prevTrace.current, latest, latestPending)
+    prevTrace.current = { id: latest, pending: latestPending }
+    setOpenTraces(next)
+  }
   const inSession = state.mode === MODE_COLLECTION || state.mode === MODE_HANDOFF
+  const latestReply = [...state.messages].reverse().find((m) => (m.speaker === 'assistant' || m.speaker === 'agent') && !m.pending && m.text.trim())
+  const [suggested, setSuggested] = useState<string[] | null>(null)
+
+  useEffect(() => {
+    if (!latestReply) {
+      setSuggested(null)
+      return
+    }
+    let cancelled = false
+    const body = { reply: latestReply.text, role, customer_id: customerId, session_id: state.sessionId }
+    void fetch('/api/suggestions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(async (resp) => {
+        if (!resp.ok) throw new Error('建议生成失败')
+        return resp.json() as Promise<{ items: string[] }>
+      })
+      .then((data) => {
+        if (!cancelled && data.items?.length) setSuggested(data.items.slice(0, 3))
+      })
+      .catch(() => {
+        if (!cancelled) setSuggested(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [latestReply?.id, latestReply?.text, role, customerId, state.sessionId])
 
   useEffect(() => {
     bottom.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
@@ -65,7 +103,7 @@ export function ChatPanel(props: Props) {
 
   const send = (value = text) => {
     const v = value.trim()
-    if (!v || state.busy) return
+    if (!v || state.busy || state.readOnly) return
     onSend(v)
     setText('')
   }
@@ -120,15 +158,30 @@ export function ChatPanel(props: Props) {
         </div>
       )}
 
+      {state.readOnly && <div className="readonly-banner">{state.readOnlyReason}</div>}
+
       <div className="chat-scroll">
         {state.messages.length === 0 && (
           <div className="chat-empty">
             <div className="serif" style={{ fontSize: 20 }}>主控 Agent 待命</div>
-            <p>选择客户后，以运营身份查询画像、欠款、报告或发起催收；也可以切换为客户直接进线，或审核一句坐席话术。</p>
+            <p>选择客户后，以运营身份查询画像、欠款、报告或发起催收。查询、报告、合规问答和话术审核由运营子 Agent 回答；催收对话由催收子 Agent 回复。也可以切换为客户直接进线。</p>
           </div>
         )}
         {state.messages.map((m) => (
-          <Bubble key={m.id} m={m} />
+          <Bubble
+            key={m.id}
+            m={m}
+            mode={state.mode}
+            traceOpen={openTraces.has(m.id)}
+            onToggleTrace={() =>
+              setOpenTraces((cur) => {
+                const next = new Set(cur)
+                if (next.has(m.id)) next.delete(m.id)
+                else next.add(m.id)
+                return next
+              })
+            }
+          />
         ))}
         <div ref={bottom} />
       </div>
@@ -137,8 +190,8 @@ export function ChatPanel(props: Props) {
         <div className="composer-bar">
           <Segmented size="small" value={role} onChange={(v) => onRole(v as ChatRole)} options={ROLE_OPTIONS} />
           <div className="examples">
-            {EXAMPLES[role](customerId ?? 'C0001').map((e) => (
-              <button key={e} onClick={() => setText(e)} disabled={state.busy}>
+            {(suggested ?? EXAMPLES[role](customerId ?? 'C0001')).map((e) => (
+              <button key={e} onClick={() => setText(e)} disabled={state.busy || state.readOnly}>
                 {e}
               </button>
             ))}
@@ -149,7 +202,12 @@ export function ChatPanel(props: Props) {
             value={text}
             onChange={(e) => setText(e.target.value)}
             autoSize={{ minRows: 2, maxRows: 5 }}
-            placeholder={`以「${ROLE_OPTIONS.find((r) => r.value === role)?.label}」身份输入，Enter 发送，Shift+Enter 换行`}
+            disabled={state.readOnly}
+            placeholder={
+              state.readOnly
+                ? state.readOnlyReason
+                : `程序会判断说话人；判断不了时按「${ROLE_OPTIONS.find((r) => r.value === role)?.label}」处理。Enter 发送，Shift+Enter 换行`
+            }
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault()
@@ -157,7 +215,7 @@ export function ChatPanel(props: Props) {
               }
             }}
           />
-          <Button type="primary" icon={<SendOutlined />} loading={state.busy} onClick={() => send()}>
+          <Button type="primary" icon={<SendOutlined />} loading={state.busy} disabled={state.readOnly} onClick={() => send()}>
             发送
           </Button>
         </div>
@@ -166,15 +224,25 @@ export function ChatPanel(props: Props) {
   )
 }
 
-function Bubble({ m }: { m: ChatMessage }) {
+function Bubble({
+  m,
+  mode,
+  traceOpen,
+  onToggleTrace,
+}: {
+  m: ChatMessage
+  mode: string
+  traceOpen: boolean
+  onToggleTrace: () => void
+}) {
   const side = m.speaker === 'operator' || m.speaker === 'customer' || m.speaker === 'human_agent' ? 'right' : 'left'
   const blocked = m.text.startsWith('[合规拦截]')
+  const showTrace = (m.speaker === 'agent' && (m.trace !== undefined || m.turn != null)) || (Boolean(m.pending) && mode === MODE_COLLECTION)
   const cls = ['bubble', `bubble-${m.speaker}`, side, blocked ? 'blocked' : '', m.error ? 'error' : ''].join(' ')
-  return (
-    <div className={`bubble-row ${side}`}>
-      <div className={cls}>
+  const body = (
+    <div className={cls}>
         <div className="bubble-who">
-          {SPEAKER_LABEL[m.speaker]}
+          {m.speaker === 'assistant' && handledByOps(m.trace) ? '运营子 Agent' : SPEAKER_LABEL[m.speaker]}
           {m.speaker === 'agent' && !m.turn && ' · 待审核话术'}
           {m.turn?.system_intent && <span className="intent">{m.turn.system_intent}</span>}
           {m.replaced && (
@@ -187,13 +255,32 @@ function Bubble({ m }: { m: ChatMessage }) {
         </div>
         {m.speaker === 'assistant' || m.pending ? (
           <div className="markdown bubble-text">
-            <Markdown remarkPlugins={[remarkGfm, remarkBreaks]}>{m.text || '…'}</Markdown>
+            <Markdown
+              remarkPlugins={[remarkGfm, remarkBreaks]}
+              components={{
+                a: ({ href, children }) =>
+                  href?.startsWith('/') ? <Link to={href}>{children}</Link> : <a href={href}>{children}</a>,
+              }}
+            >
+              {m.text || '…'}
+            </Markdown>
             {m.pending && <span className="caret" />}
           </div>
         ) : (
           <div className="bubble-text">{m.text}</div>
         )}
-      </div>
+    </div>
+  )
+  return (
+    <div className={`bubble-row ${side}`}>
+      {showTrace ? (
+        <div className="agent-stack">
+          <AgentTrace trace={m.trace ?? []} turn={m.turn} open={traceOpen} busy={Boolean(m.pending)} onToggle={onToggleTrace} />
+          {body}
+        </div>
+      ) : (
+        body
+      )}
     </div>
   )
 }

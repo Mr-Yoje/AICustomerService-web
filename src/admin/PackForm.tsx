@@ -32,6 +32,7 @@ export function PackForm({ draft, set, opts }: { draft: Doc; set: Setter; opts: 
   const pre = (draft.pre_tools ?? []) as PreTool[]
   const handoff = (draft.handoff ?? {}) as Doc
   const emotion = (handoff.emotion ?? {}) as Doc
+  const exitRule = (draft.exit ?? {}) as Doc
   const speech = (draft.speech ?? {}) as Doc
   const posts = list(draft.post_tasks)
 
@@ -83,9 +84,7 @@ export function PackForm({ draft, set, opts }: { draft: Doc; set: Setter; opts: 
       </Section>
 
       <Section title="转人工条件">
-        <Field label="明确拒绝次数" help="会话内客户明确拒绝达到该次数时转人工">
-          <InputNumber min={1} value={num(handoff.max_refusals)} onChange={(v) => set(['handoff', 'max_refusals'], v)} />
-        </Field>
+        <p className="hint">客户明确要求转人工、坐席话术命中严重规则时也会转人工。</p>
         <Field label="情绪类型">
           <Select mode="multiple" value={list(emotion.types)} onChange={(v) => set(['handoff', 'emotion', 'types'], v)} options={opts.emotions.map((e) => ({ value: e, label: e }))} />
         </Field>
@@ -94,6 +93,19 @@ export function PackForm({ draft, set, opts }: { draft: Doc; set: Setter; opts: 
         </Field>
         <Field label="连续低置信轮数" help="意图识别置信度连续偏低达到该轮数时转人工">
           <InputNumber min={1} value={num(handoff.low_confidence_turns)} onChange={(v) => set(['handoff', 'low_confidence_turns'], v)} />
+        </Field>
+      </Section>
+
+      <Section title="主动结束">
+        <Field label="累计拒绝次数" help="会话内客户累计明确拒绝还款达到该次数时，AI 坐席说结束语（话术模板 exit）后主动结束会话，并生成拒绝跟进待办；留空表示不主动结束">
+          <InputNumber
+            min={1}
+            value={num(exitRule.max_refusals)}
+            onChange={(v) => {
+              const { exit: _, ...rest } = draft
+              set([], v === null ? rest : { ...draft, exit: { ...exitRule, max_refusals: v } })
+            }}
+          />
         </Field>
       </Section>
 

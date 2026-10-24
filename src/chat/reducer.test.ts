@@ -58,10 +58,30 @@ describe('chatReducer', () => {
 
   it('客户发言进入催收模式，AI 坐席回复，并记录会话', () => {
     let s = chatReducer(initialChat, { type: 'send', role: 'customer', text: '能分12期吗' })
-    s = run(s, ['done', turn({ speaker: 'customer', mode: '催收对话模式', session_id: 'S-1', reply: '可以办理分期' })])
+    s = run(
+      s,
+      ['trace', { step: 'decide', name: '阶段与动作', status: 'ok', detail: { stage: '协商' }, ms: 3 }],
+      ['done', turn({ speaker: 'customer', mode: '催收对话模式', session_id: 'S-1', reply: '可以办理分期', willingness_score: 60, willingness_level: '中', strategy: '协商分期', key_points: ['客户意图：要求分期'] })],
+    )
     expect(s.sessionId).toBe('S-1')
     expect(s.mode).toBe('催收对话模式')
-    expect(s.messages.at(-1)?.speaker).toBe('agent')
+    const last = s.messages.at(-1)!
+    expect(last.speaker).toBe('agent')
+    expect(last.trace).toEqual([expect.objectContaining({ name: '阶段与动作' })])
+    expect(last.turn).toMatchObject({ reply: '可以办理分期', willingness_score: 60, strategy: '协商分期' })
+  })
+
+  it('发起催收的开场白记为 AI 坐席，轨迹与本轮结果在同一条消息上', () => {
+    let s = chatReducer(initialChat, { type: 'send', role: 'operator', text: '对C0001发起催收' })
+    s = run(
+      s,
+      ['trace', { step: 'route', name: '切换模式', status: 'ok', detail: {}, ms: 1 }],
+      ['done', turn({ speaker: 'operator', mode: '催收对话模式', session_id: 'S-2', reply: '您好，我是XX金融' })],
+    )
+    const last = s.messages.at(-1)!
+    expect(last.speaker).toBe('agent')
+    expect(last.trace?.[0].name).toBe('切换模式')
+    expect(last.turn?.reply).toBe('您好，我是XX金融')
   })
 
   it('人工坐席合规话术显示为发送确认', () => {
