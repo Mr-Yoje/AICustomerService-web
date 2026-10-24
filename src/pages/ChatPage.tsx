@@ -134,16 +134,14 @@ export function ChatPage() {
 
   return (
     <div className={`page chat-page layout-${layout}`}>
-      {layout === 'operator' && (
-        <div className="customer-col">
-          <CustomerPanel selected={customerId} onSelect={selectCustomer} detail={customer.data} loading={customer.loading} />
-          <SessionList
-            currentId={state.sessionId}
-            revision={`${state.sessionId ?? ''}|${state.mode}|${state.busy}|${state.lastTurn?.trace_id ?? ''}`}
-            onOpen={(item) => void openSaved(item)}
-          />
-        </div>
-      )}
+      <div className="customer-col">
+        <CustomerPanel selected={customerId} onSelect={selectCustomer} detail={customer.data} loading={customer.loading} />
+        <SessionList
+          currentId={state.sessionId}
+          revision={`${state.sessionId ?? ''}|${state.mode}|${state.busy}|${state.lastTurn?.trace_id ?? ''}`}
+          onOpen={(item) => void openSaved(item)}
+        />
+      </div>
       <ChatPanel
         state={state}
         customerId={customerId}

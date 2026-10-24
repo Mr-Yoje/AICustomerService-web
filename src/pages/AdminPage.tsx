@@ -6,7 +6,8 @@ import { api, unwrap } from '../api/client'
 import { ConfigEditor } from '../admin/ConfigEditor'
 import { PackForm, type PackFormOptions } from '../admin/PackForm'
 import { PolicyForm } from '../admin/PolicyForm'
-import { RegistryView, RulesView, TemplatesView } from '../admin/ReadOnly'
+import { RegistryForm } from '../admin/RegistryForm'
+import { RulesEditor, TemplatesEditor } from '../admin/CatalogForm'
 import { useLoad } from '../lib/useLoad'
 import './admin.css'
 
@@ -15,9 +16,9 @@ const SECTIONS = [
   { key: 'policy', label: '评分与策略', group: '可配置' },
   { key: 'checkpoints', label: '合规检查点', group: '可配置' },
   { key: 'intents', label: '意图映射', group: '可配置' },
-  { key: 'rules', label: '合规规则库', group: '只读' },
-  { key: 'templates', label: '分期模板', group: '只读' },
-  { key: 'registry', label: '工具注册表', group: '只读' },
+  { key: 'registry', label: '工具注册表', group: '可配置' },
+  { key: 'rules', label: '合规规则库', group: '可配置' },
+  { key: 'templates', label: '分期模板', group: '可配置' },
 ] as const
 
 type SectionKey = (typeof SECTIONS)[number]['key']
@@ -37,7 +38,7 @@ export function AdminPage() {
       </h1>
       <div className="admin-grid">
         <nav className="panel admin-nav">
-          {(['可配置', '只读'] as const).map((g) => (
+          {(['可配置', '只读'] as const).filter((g) => SECTIONS.some((s) => s.group === g)).map((g) => (
             <div key={g}>
               <div className="admin-nav-group">{g}</div>
               {SECTIONS.filter((s) => s.group === g).map((s) => (
@@ -75,16 +76,32 @@ export function AdminPage() {
               hint="说话人识别标记、客户与运营意图关键词、意图到系统意图的映射、兜底情绪。"
             />
           )}
-          {section === 'rules' && <RulesView rules={rules.data} />}
-          {section === 'templates' && <TemplatesView templates={templates.data} />}
-          {section === 'registry' && <RegistryView groups={registry.data} />}
+          {section === 'registry' && (
+            <ConfigEditor
+              kind="registry"
+              configKey="default"
+              title="工具注册表"
+              hint="说明、超时、重试次数和是否启用。保存后运营子 Agent 立即使用新配置；催收子 Agent 从下一通会话开始使用。"
+              form={(d, set) => <RegistryForm draft={d} set={set} />}
+            />
+          )}
+          {section === 'rules' && rules.data && (
+            <RulesEditor key={rules.data.map((r) => `${r.rule_id}:${r.rule_content}:${r.violation_level}:${r.action}`).join('|')} rules={rules.data} onSaved={() => void rules.reload()} />
+          )}
+          {section === 'templates' && templates.data && (
+            <TemplatesEditor
+              key={templates.data.map((t) => `${t.template_id}:${t.max_periods}:${t.rate}:${t.fee}:${t.condition}`).join('|')}
+              templates={templates.data}
+              onSaved={() => void templates.reload()}
+            />
+          )}
         </div>
       </div>
     </div>
   )
 }
 
-function Packs({ rules, registry }: { rules: { rule_id: string; rule_type: string | null }[] | undefined; registry: { owner: string; items: { name?: unknown; kind?: unknown }[] }[] | undefined }) {
+function Packs({ rules, registry }: { rules: { rule_id: string; rule_type: string | null }[] | undefined; registry: { owner: string; items: { name?: unknown; kind?: unknown; enabled?: boolean }[] }[] | undefined }) {
   const { message } = App.useApp()
   const list = useLoad(() => unwrap(api.GET('/api/config')), [])
   const emotions = useLoad(() => unwrap(api.GET('/api/config/{kind}/{key}', { params: { path: { kind: 'intents', key: 'default' } } })), [])
@@ -97,7 +114,9 @@ function Packs({ rules, registry }: { rules: { rule_id: string; rule_type: strin
   const opts: PackFormOptions = useMemo(
     () => ({
       rules: (rules ?? []).map((r) => ({ value: r.rule_id, label: `${r.rule_id} ${r.rule_type ?? ''}` })),
-      tools: (registry?.find((g) => g.owner === 'ops')?.items ?? []).filter((i) => i.kind === 'tool').map((i) => String(i.name)),
+      tools: (registry?.find((g) => g.owner === 'ops')?.items ?? [])
+        .filter((i) => i.kind === 'tool' && i.enabled !== false)
+        .map((i) => String(i.name)),
       emotions: ((emotions.data?.content as { emotions?: string[] } | undefined)?.emotions ?? []) as string[],
     }),
     [rules, registry, emotions.data],

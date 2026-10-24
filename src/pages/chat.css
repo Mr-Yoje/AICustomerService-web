@@ -1,15 +1,11 @@
 .chat-page {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: 300px minmax(420px, 1fr);
   grid-template-rows: minmax(0, 1fr);
   gap: 14px;
   height: 100%;
   overflow: hidden;
   padding: 16px;
-}
-
-.chat-page.layout-operator {
-  grid-template-columns: 300px minmax(420px, 1fr);
 }
 
 .customer-col,
@@ -191,6 +187,25 @@
 
 .bubble-row.right {
   justify-content: flex-end;
+}
+
+.bubble-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 82%;
+  gap: 4px;
+}
+
+.bubble-col .bubble {
+  max-width: 100%;
+}
+
+.bubble-usage {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--muted);
+  padding-left: 4px;
 }
 
 .agent-stack {
@@ -487,7 +502,7 @@
 }
 
 @media (max-width: 1280px) {
-  .chat-page.layout-operator {
+  .chat-page {
     grid-template-columns: 240px minmax(0, 1fr);
   }
 }

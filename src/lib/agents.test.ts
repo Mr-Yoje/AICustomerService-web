@@ -5,6 +5,7 @@ describe('ownerLabel', () => {
   it('三组注册表分别对应主控、运营子 Agent 和催收子 Agent', () => {
     expect(ownerLabel('main')).toBe('主控 Agent')
     expect(ownerLabel('ops')).toBe('运营子 Agent')
+    expect(ownerLabel('collection')).toBe('催收子 Agent')
     expect(ownerLabel('collection:consumer_finance')).toBe('催收子 Agent · consumer_finance')
   })
 })

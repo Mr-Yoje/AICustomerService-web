@@ -39,6 +39,7 @@ describe('chatReducer', () => {
     s = run(s, ['done', turn({ reply: '名下1笔逾期' })])
     const last = s.messages.at(-1)!
     expect(last).toMatchObject({ text: '名下1笔逾期', pending: false, speaker: 'assistant' })
+    expect(last.usage).toBeUndefined()
     expect(s.busy).toBe(false)
     expect(s.lastTurn?.system_intent).toBe('多贷款管理')
   })
@@ -61,12 +62,13 @@ describe('chatReducer', () => {
     s = run(
       s,
       ['trace', { step: 'decide', name: '阶段与动作', status: 'ok', detail: { stage: '协商' }, ms: 3 }],
-      ['done', turn({ speaker: 'customer', mode: '催收对话模式', session_id: 'S-1', reply: '可以办理分期', willingness_score: 60, willingness_level: '中', strategy: '协商分期', key_points: ['客户意图：要求分期'] })],
+      ['done', turn({ speaker: 'customer', mode: '催收对话模式', session_id: 'S-1', reply: '可以办理分期', willingness_score: 60, willingness_level: '中', strategy: '协商分期', key_points: ['客户意图：要求分期'], usage: { prompt_tokens: 120, completion_tokens: 30, cache_hit_tokens: 80 } })],
     )
     expect(s.sessionId).toBe('S-1')
     expect(s.mode).toBe('催收对话模式')
     const last = s.messages.at(-1)!
     expect(last.speaker).toBe('agent')
+    expect(last.usage).toEqual({ prompt_tokens: 120, completion_tokens: 30, cache_hit_tokens: 80 })
     expect(last.trace).toEqual([expect.objectContaining({ name: '阶段与动作' })])
     expect(last.turn).toMatchObject({ reply: '可以办理分期', willingness_score: 60, strategy: '协商分期' })
   })

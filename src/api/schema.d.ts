@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/api/suggestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Suggestions */
+        post: operations["suggestions_api_suggestions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/chat": {
         parameters: {
             query?: never;
@@ -81,6 +98,23 @@ export interface paths {
         };
         /** Get Customer */
         get: operations["get_customer_api_customers__customer_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/costs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cost Report */
+        get: operations["cost_report_api_costs_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -356,6 +390,24 @@ export interface paths {
         /** List Rules */
         get: operations["list_rules_api_rules_get"];
         put?: never;
+        /** Create Rule */
+        post: operations["create_rule_api_rules_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rules/{rule_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Save Rule */
+        put: operations["save_rule_api_rules__rule_id__put"];
         post?: never;
         delete?: never;
         options?: never;
@@ -373,6 +425,24 @@ export interface paths {
         /** List Templates */
         get: operations["list_templates_api_templates_get"];
         put?: never;
+        /** Create Template */
+        post: operations["create_template_api_templates_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/templates/{template_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Save Template */
+        put: operations["save_template_api_templates__template_id__put"];
         post?: never;
         delete?: never;
         options?: never;
@@ -569,6 +639,45 @@ export interface components {
             /** Name */
             name: string;
         };
+        /** CostReport */
+        CostReport: {
+            /** Model */
+            model: string;
+            /** Currency */
+            currency: string;
+            /** Unit */
+            unit: string;
+            off_peak: components["schemas"]["PriceCard"];
+            peak: components["schemas"]["PriceCard"];
+            /** Peak Note */
+            peak_note: string;
+            summary: components["schemas"]["TokenUsage"];
+            /** Sessions */
+            sessions: components["schemas"]["CostSession"][];
+        };
+        /** CostSession */
+        CostSession: {
+            /** Calls */
+            calls: number;
+            /** Unmetered */
+            unmetered: number;
+            /** Prompt Tokens */
+            prompt_tokens: number;
+            /** Completion Tokens */
+            completion_tokens: number;
+            /** Cache Hit Tokens */
+            cache_hit_tokens: number;
+            /** Cache Miss Tokens */
+            cache_miss_tokens: number;
+            /** Cost Cny */
+            cost_cny: number;
+            /** Session Id */
+            session_id: string | null;
+            /** Customer Id */
+            customer_id: string | null;
+            /** Started At */
+            started_at: string | null;
+        };
         /** CustomerBrief */
         CustomerBrief: {
             /** Customer Id */
@@ -723,6 +832,7 @@ export interface components {
             system_intent: string;
             /** Reply */
             reply: string;
+            usage?: components["schemas"]["TurnUsage"] | null;
             /** Customer Id */
             customer_id?: string | null;
             /**
@@ -837,6 +947,15 @@ export interface components {
             /** Updated At */
             updated_at: string | null;
         };
+        /** PriceCard */
+        PriceCard: {
+            /** Cache Hit */
+            cache_hit: number;
+            /** Cache Miss */
+            cache_miss: number;
+            /** Output */
+            output: number;
+        };
         /** RegistryGroup */
         RegistryGroup: {
             /** Owner */
@@ -850,6 +969,19 @@ export interface components {
         RetryIn: {
             /** Name */
             name?: string | null;
+        };
+        /** RuleCreate */
+        RuleCreate: {
+            /** Rule Type */
+            rule_type: string;
+            /** Rule Content */
+            rule_content: string;
+            /** Violation Level */
+            violation_level: string;
+            /** Action */
+            action: string;
+            /** Rule Id */
+            rule_id: string;
         };
         /** RuleHit */
         RuleHit: {
@@ -872,6 +1004,17 @@ export interface components {
              * @default 1
              */
             confidence: number;
+        };
+        /** RuleIn */
+        RuleIn: {
+            /** Rule Type */
+            rule_type: string;
+            /** Rule Content */
+            rule_content: string;
+            /** Violation Level */
+            violation_level: string;
+            /** Action */
+            action: string;
         };
         /** RuleRow */
         RuleRow: {
@@ -956,6 +1099,53 @@ export interface components {
             /** End Reason */
             end_reason: string | null;
         };
+        /** SuggestIn */
+        SuggestIn: {
+            /** Reply */
+            reply: string;
+            /**
+             * Role
+             * @default operator
+             */
+            role: string;
+            /** Customer Id */
+            customer_id?: string | null;
+            /** Session Id */
+            session_id?: string | null;
+        };
+        /** SuggestOut */
+        SuggestOut: {
+            /** Items */
+            items: string[];
+        };
+        /** TemplateCreate */
+        TemplateCreate: {
+            /** Template Type */
+            template_type: string;
+            /** Max Periods */
+            max_periods: number;
+            /** Rate */
+            rate: number;
+            /** Fee */
+            fee: number;
+            /** Condition */
+            condition: string;
+            /** Template Id */
+            template_id: string;
+        };
+        /** TemplateIn */
+        TemplateIn: {
+            /** Template Type */
+            template_type: string;
+            /** Max Periods */
+            max_periods: number;
+            /** Rate */
+            rate: number;
+            /** Fee */
+            fee: number;
+            /** Condition */
+            condition: string;
+        };
         /** TemplateRow */
         TemplateRow: {
             /** Template Id */
@@ -993,6 +1183,41 @@ export interface components {
             status: string;
             /** Created At */
             created_at: string;
+        };
+        /** TokenUsage */
+        TokenUsage: {
+            /** Calls */
+            calls: number;
+            /** Unmetered */
+            unmetered: number;
+            /** Prompt Tokens */
+            prompt_tokens: number;
+            /** Completion Tokens */
+            completion_tokens: number;
+            /** Cache Hit Tokens */
+            cache_hit_tokens: number;
+            /** Cache Miss Tokens */
+            cache_miss_tokens: number;
+            /** Cost Cny */
+            cost_cny: number;
+        };
+        /** TurnUsage */
+        TurnUsage: {
+            /**
+             * Prompt Tokens
+             * @default 0
+             */
+            prompt_tokens: number;
+            /**
+             * Completion Tokens
+             * @default 0
+             */
+            completion_tokens: number;
+            /**
+             * Cache Hit Tokens
+             * @default 0
+             */
+            cache_hit_tokens: number;
         };
         /** ValidationError */
         ValidationError: {
@@ -1043,6 +1268,39 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    suggestions_api_suggestions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SuggestIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SuggestOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     chat_api_chat_post: {
         parameters: {
             query?: never;
@@ -1208,11 +1466,11 @@ export interface operations {
             };
         };
     };
-    list_sessions_api_sessions_get: {
+    cost_report_api_costs_get: {
         parameters: {
             query?: {
-                customer_id?: string;
-                status?: string;
+                start?: string;
+                end?: string;
             };
             header?: never;
             path?: never;
@@ -1226,7 +1484,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SessionListItem"][];
+                    "application/json": components["schemas"]["CostReport"];
                 };
             };
             /** @description Validation Error */
@@ -1236,6 +1494,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_sessions_api_sessions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionListItem"][];
                 };
             };
         };
@@ -1762,6 +2040,70 @@ export interface operations {
             };
         };
     };
+    create_rule_api_rules_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuleCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RuleRow"];
+                };
+            };
+            /** @description 校验失败，detail.errors 为错误清单 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    save_rule_api_rules__rule_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rule_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuleIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RuleRow"];
+                };
+            };
+            /** @description 校验失败，detail.errors 为错误清单 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     list_templates_api_templates_get: {
         parameters: {
             query?: never;
@@ -1779,6 +2121,70 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["TemplateRow"][];
                 };
+            };
+        };
+    };
+    create_template_api_templates_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TemplateCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TemplateRow"];
+                };
+            };
+            /** @description 校验失败，detail.errors 为错误清单 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    save_template_api_templates__template_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                template_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TemplateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TemplateRow"];
+                };
+            };
+            /** @description 校验失败，detail.errors 为错误清单 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

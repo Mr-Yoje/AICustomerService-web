@@ -5,6 +5,23 @@ import type { SSEMessage } from '../api/sse'
 /** assistant 为对运营的回答（查询与合规由运营子 Agent 生成，路由与结束催收由主控生成）；agent 为 AI 坐席对客户的回复 */
 export type Speaker = 'operator' | 'customer' | 'agent' | 'human_agent' | 'assistant' | 'system'
 
+/** 本轮大模型调用合计。没有调用时不挂到消息上。 */
+export interface ReplyUsage {
+  prompt_tokens: number
+  completion_tokens: number
+  cache_hit_tokens: number
+}
+
+export function replyUsage(turn: { usage?: ReplyUsage | null }): ReplyUsage | undefined {
+  const usage = turn.usage
+  if (!usage) return undefined
+  return {
+    prompt_tokens: usage.prompt_tokens,
+    completion_tokens: usage.completion_tokens,
+    cache_hit_tokens: usage.cache_hit_tokens,
+  }
+}
+
 export interface ChatMessage {
   id: number
   speaker: Speaker
@@ -15,6 +32,7 @@ export interface ChatMessage {
   /** 与 turn 同属这一轮；只有 AI 坐席回复在界面上展开 */
   trace?: TraceEvent[]
   turn?: MainTurn
+  usage?: ReplyUsage
 }
 
 export interface ChatState {
@@ -111,6 +129,7 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
           pending: false,
           speaker: replySpeaker(turn),
           turn,
+          usage: replyUsage(turn),
         }))
         return {
           ...next,

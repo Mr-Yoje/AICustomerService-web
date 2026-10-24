@@ -5,6 +5,47 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/api/suggestions": {
+      "post": {
+        "tags": [
+          "对话"
+        ],
+        "summary": "Suggestions",
+        "operationId": "suggestions_api_suggestions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuggestIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuggestOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/chat": {
       "post": {
         "tags": [
@@ -257,32 +298,32 @@
         }
       }
     },
-    "/api/sessions": {
+    "/api/costs": {
       "get": {
         "tags": [
           "数据"
         ],
-        "summary": "List Sessions",
-        "operationId": "list_sessions_api_sessions_get",
+        "summary": "Cost Report",
+        "operationId": "cost_report_api_costs_get",
         "parameters": [
           {
-            "name": "customer_id",
+            "name": "start",
             "in": "query",
             "required": false,
             "schema": {
               "type": "string",
               "default": "",
-              "title": "Customer Id"
+              "title": "Start"
             }
           },
           {
-            "name": "status",
+            "name": "end",
             "in": "query",
             "required": false,
             "schema": {
               "type": "string",
               "default": "",
-              "title": "Status"
+              "title": "End"
             }
           }
         ],
@@ -292,11 +333,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SessionListItem"
-                  },
-                  "title": "Response List Sessions Api Sessions Get"
+                  "$ref": "#/components/schemas/CostReport"
                 }
               }
             }
@@ -307,6 +344,31 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions": {
+      "get": {
+        "tags": [
+          "数据"
+        ],
+        "summary": "List Sessions",
+        "operationId": "list_sessions_api_sessions_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SessionListItem"
+                  },
+                  "type": "array",
+                  "title": "Response List Sessions Api Sessions Get"
                 }
               }
             }
@@ -1133,6 +1195,83 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "配置"
+        ],
+        "summary": "Create Rule",
+        "operationId": "create_rule_api_rules_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleRow"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "校验失败，detail.errors 为错误清单"
+          }
+        }
+      }
+    },
+    "/api/rules/{rule_id}": {
+      "put": {
+        "tags": [
+          "配置"
+        ],
+        "summary": "Save Rule",
+        "operationId": "save_rule_api_rules__rule_id__put",
+        "parameters": [
+          {
+            "name": "rule_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Rule Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleRow"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "校验失败，detail.errors 为错误清单"
+          }
+        }
       }
     },
     "/api/templates": {
@@ -1156,6 +1295,83 @@
                 }
               }
             }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "配置"
+        ],
+        "summary": "Create Template",
+        "operationId": "create_template_api_templates_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplateCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplateRow"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "校验失败，detail.errors 为错误清单"
+          }
+        }
+      }
+    },
+    "/api/templates/{template_id}": {
+      "put": {
+        "tags": [
+          "配置"
+        ],
+        "summary": "Save Template",
+        "operationId": "save_template_api_templates__template_id__put",
+        "parameters": [
+          {
+            "name": "template_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Template Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplateIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplateRow"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "校验失败，detail.errors 为错误清单"
           }
         }
       }
@@ -1683,6 +1899,133 @@
         ],
         "title": "CopyIn"
       },
+      "CostReport": {
+        "properties": {
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit"
+          },
+          "off_peak": {
+            "$ref": "#/components/schemas/PriceCard"
+          },
+          "peak": {
+            "$ref": "#/components/schemas/PriceCard"
+          },
+          "peak_note": {
+            "type": "string",
+            "title": "Peak Note"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/TokenUsage"
+          },
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/CostSession"
+            },
+            "type": "array",
+            "title": "Sessions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "model",
+          "currency",
+          "unit",
+          "off_peak",
+          "peak",
+          "peak_note",
+          "summary",
+          "sessions"
+        ],
+        "title": "CostReport"
+      },
+      "CostSession": {
+        "properties": {
+          "calls": {
+            "type": "integer",
+            "title": "Calls"
+          },
+          "unmetered": {
+            "type": "integer",
+            "title": "Unmetered"
+          },
+          "prompt_tokens": {
+            "type": "integer",
+            "title": "Prompt Tokens"
+          },
+          "completion_tokens": {
+            "type": "integer",
+            "title": "Completion Tokens"
+          },
+          "cache_hit_tokens": {
+            "type": "integer",
+            "title": "Cache Hit Tokens"
+          },
+          "cache_miss_tokens": {
+            "type": "integer",
+            "title": "Cache Miss Tokens"
+          },
+          "cost_cny": {
+            "type": "number",
+            "title": "Cost Cny"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "customer_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Id"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "calls",
+          "unmetered",
+          "prompt_tokens",
+          "completion_tokens",
+          "cache_hit_tokens",
+          "cache_miss_tokens",
+          "cost_cny",
+          "session_id",
+          "customer_id",
+          "started_at"
+        ],
+        "title": "CostSession"
+      },
       "CustomerBrief": {
         "properties": {
           "customer_id": {
@@ -2138,6 +2481,16 @@
             "type": "string",
             "title": "Reply"
           },
+          "usage": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TurnUsage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "customer_id": {
             "anyOf": [
               {
@@ -2424,6 +2777,29 @@
         ],
         "title": "PostTask"
       },
+      "PriceCard": {
+        "properties": {
+          "cache_hit": {
+            "type": "number",
+            "title": "Cache Hit"
+          },
+          "cache_miss": {
+            "type": "number",
+            "title": "Cache Miss"
+          },
+          "output": {
+            "type": "number",
+            "title": "Output"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cache_hit",
+          "cache_miss",
+          "output"
+        ],
+        "title": "PriceCard"
+      },
       "RegistryGroup": {
         "properties": {
           "owner": {
@@ -2462,6 +2838,39 @@
         },
         "type": "object",
         "title": "RetryIn"
+      },
+      "RuleCreate": {
+        "properties": {
+          "rule_type": {
+            "type": "string",
+            "title": "Rule Type"
+          },
+          "rule_content": {
+            "type": "string",
+            "title": "Rule Content"
+          },
+          "violation_level": {
+            "type": "string",
+            "title": "Violation Level"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "rule_id": {
+            "type": "string",
+            "title": "Rule Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rule_type",
+          "rule_content",
+          "violation_level",
+          "action",
+          "rule_id"
+        ],
+        "title": "RuleCreate"
       },
       "RuleHit": {
         "properties": {
@@ -2510,6 +2919,34 @@
           "evidence"
         ],
         "title": "RuleHit"
+      },
+      "RuleIn": {
+        "properties": {
+          "rule_type": {
+            "type": "string",
+            "title": "Rule Type"
+          },
+          "rule_content": {
+            "type": "string",
+            "title": "Rule Content"
+          },
+          "violation_level": {
+            "type": "string",
+            "title": "Violation Level"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rule_type",
+          "rule_content",
+          "violation_level",
+          "action"
+        ],
+        "title": "RuleIn"
       },
       "RuleRow": {
         "properties": {
@@ -2818,6 +3255,133 @@
         ],
         "title": "SessionRow"
       },
+      "SuggestIn": {
+        "properties": {
+          "reply": {
+            "type": "string",
+            "title": "Reply"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role",
+            "default": "operator"
+          },
+          "customer_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Id"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reply"
+        ],
+        "title": "SuggestIn"
+      },
+      "SuggestOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "SuggestOut"
+      },
+      "TemplateCreate": {
+        "properties": {
+          "template_type": {
+            "type": "string",
+            "title": "Template Type"
+          },
+          "max_periods": {
+            "type": "integer",
+            "title": "Max Periods"
+          },
+          "rate": {
+            "type": "number",
+            "title": "Rate"
+          },
+          "fee": {
+            "type": "number",
+            "title": "Fee"
+          },
+          "condition": {
+            "type": "string",
+            "title": "Condition"
+          },
+          "template_id": {
+            "type": "string",
+            "title": "Template Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "template_type",
+          "max_periods",
+          "rate",
+          "fee",
+          "condition",
+          "template_id"
+        ],
+        "title": "TemplateCreate"
+      },
+      "TemplateIn": {
+        "properties": {
+          "template_type": {
+            "type": "string",
+            "title": "Template Type"
+          },
+          "max_periods": {
+            "type": "integer",
+            "title": "Max Periods"
+          },
+          "rate": {
+            "type": "number",
+            "title": "Rate"
+          },
+          "fee": {
+            "type": "number",
+            "title": "Fee"
+          },
+          "condition": {
+            "type": "string",
+            "title": "Condition"
+          }
+        },
+        "type": "object",
+        "required": [
+          "template_type",
+          "max_periods",
+          "rate",
+          "fee",
+          "condition"
+        ],
+        "title": "TemplateIn"
+      },
       "TemplateRow": {
         "properties": {
           "template_id": {
@@ -2965,6 +3529,70 @@
           "created_at"
         ],
         "title": "Todo"
+      },
+      "TokenUsage": {
+        "properties": {
+          "calls": {
+            "type": "integer",
+            "title": "Calls"
+          },
+          "unmetered": {
+            "type": "integer",
+            "title": "Unmetered"
+          },
+          "prompt_tokens": {
+            "type": "integer",
+            "title": "Prompt Tokens"
+          },
+          "completion_tokens": {
+            "type": "integer",
+            "title": "Completion Tokens"
+          },
+          "cache_hit_tokens": {
+            "type": "integer",
+            "title": "Cache Hit Tokens"
+          },
+          "cache_miss_tokens": {
+            "type": "integer",
+            "title": "Cache Miss Tokens"
+          },
+          "cost_cny": {
+            "type": "number",
+            "title": "Cost Cny"
+          }
+        },
+        "type": "object",
+        "required": [
+          "calls",
+          "unmetered",
+          "prompt_tokens",
+          "completion_tokens",
+          "cache_hit_tokens",
+          "cache_miss_tokens",
+          "cost_cny"
+        ],
+        "title": "TokenUsage"
+      },
+      "TurnUsage": {
+        "properties": {
+          "prompt_tokens": {
+            "type": "integer",
+            "title": "Prompt Tokens",
+            "default": 0
+          },
+          "completion_tokens": {
+            "type": "integer",
+            "title": "Completion Tokens",
+            "default": 0
+          },
+          "cache_hit_tokens": {
+            "type": "integer",
+            "title": "Cache Hit Tokens",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "TurnUsage"
       },
       "ValidationError": {
         "properties": {

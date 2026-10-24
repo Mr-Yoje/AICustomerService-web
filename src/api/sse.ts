@@ -1,4 +1,5 @@
 import type { ChatIn } from './types'
+import { newTraceId, rememberTrace } from './trace'
 
 export interface SSEMessage {
   event: string
@@ -40,12 +41,14 @@ export async function streamChat(
   onEvent: (msg: SSEMessage) => void,
   signal?: AbortSignal,
 ): Promise<void> {
+  const traceId = newTraceId()
   const resp = await fetch('/api/chat', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
+    headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream', 'X-Trace-Id': traceId },
     body: JSON.stringify(body),
     signal,
   })
+  rememberTrace(resp.headers.get('X-Trace-Id') || traceId)
   if (!resp.ok || !resp.body) throw new Error(`对话请求失败（HTTP ${resp.status}）`)
   const reader = resp.body.pipeThrough(new TextDecoderStream()).getReader()
   let buffer = ''

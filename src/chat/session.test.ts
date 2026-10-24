@@ -6,11 +6,13 @@ describe('toChatMessages', () => {
   it('按角色还原气泡，不带轨迹', () => {
     const messages = toChatMessages([
       { role: '客户', text: '能不能分12期' },
-      { role: 'AI坐席', text: '可以办理分期' },
+      { role: 'AI坐席', text: '可以办理分期', meta: { usage: { prompt_tokens: 120, completion_tokens: 30, cache_hit_tokens: 80 } } },
       { role: '人工坐席', text: '我来继续' },
     ])
     expect(messages.map((m) => m.speaker)).toEqual(['customer', 'agent', 'human_agent'])
     expect(messages.every((m) => m.trace === undefined && m.turn === undefined)).toBe(true)
+    expect(messages[1].usage).toEqual({ prompt_tokens: 120, completion_tokens: 30, cache_hit_tokens: 80 })
+    expect(messages[0].usage).toBeUndefined()
   })
 })
 

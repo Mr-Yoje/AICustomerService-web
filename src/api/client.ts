@@ -1,7 +1,15 @@
 import createClient from 'openapi-fetch'
 import type { paths } from './schema'
+import { newTraceId } from './trace'
 
 export const api = createClient<paths>({ baseUrl: '' })
+
+api.use({
+  onRequest({ request }) {
+    if (!request.headers.has('X-Trace-Id')) request.headers.set('X-Trace-Id', newTraceId())
+    return request
+  },
+})
 
 export class ApiError extends Error {
   readonly status: number

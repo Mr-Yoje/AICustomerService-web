@@ -7,9 +7,10 @@ import Markdown from 'react-markdown'
 import remarkBreaks from 'remark-breaks'
 import remarkGfm from 'remark-gfm'
 import type { Artifact, ChatRole } from '../api/types'
+import { currentTraceId, newTraceId } from '../api/trace'
 import { HandoffPackage } from '../components/HandoffPackage'
 import { MODE_COLLECTION, MODE_HANDOFF } from '../api/types'
-import type { ChatMessage, ChatState, Speaker } from './reducer'
+import type { ChatMessage, ChatState, ReplyUsage, Speaker } from './reducer'
 import { AgentTrace } from './TracePanel'
 import { handledByOps } from '../lib/agents'
 import { foldTraces, latestAgentTraceId } from './traceFold'
@@ -81,7 +82,11 @@ export function ChatPanel(props: Props) {
     }
     let cancelled = false
     const body = { reply: latestReply.text, role, customer_id: customerId, session_id: state.sessionId }
-    void fetch('/api/suggestions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    void fetch('/api/suggestions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Trace-Id': currentTraceId() || newTraceId() },
+      body: JSON.stringify(body),
+    })
       .then(async (resp) => {
         if (!resp.ok) throw new Error('建议生成失败')
         return resp.json() as Promise<{ items: string[] }>
@@ -224,6 +229,14 @@ export function ChatPanel(props: Props) {
   )
 }
 
+function UsageLine({ usage }: { usage: ReplyUsage }) {
+  return (
+    <div className="bubble-usage">
+      输入 {usage.prompt_tokens} · 输出 {usage.completion_tokens} · 缓存命中 {usage.cache_hit_tokens}
+    </div>
+  )
+}
+
 function Bubble({
   m,
   mode,
@@ -239,6 +252,7 @@ function Bubble({
   const blocked = m.text.startsWith('[合规拦截]')
   const showTrace = (m.speaker === 'agent' && (m.trace !== undefined || m.turn != null)) || (Boolean(m.pending) && mode === MODE_COLLECTION)
   const cls = ['bubble', `bubble-${m.speaker}`, side, blocked ? 'blocked' : '', m.error ? 'error' : ''].join(' ')
+  const usage = (m.speaker === 'assistant' || m.speaker === 'agent') && m.usage ? <UsageLine usage={m.usage} /> : null
   const body = (
     <div className={cls}>
         <div className="bubble-who">
@@ -277,9 +291,13 @@ function Bubble({
         <div className="agent-stack">
           <AgentTrace trace={m.trace ?? []} turn={m.turn} open={traceOpen} busy={Boolean(m.pending)} onToggle={onToggleTrace} />
           {body}
+          {usage}
         </div>
       ) : (
-        body
+        <div className="bubble-col">
+          {body}
+          {usage}
+        </div>
       )}
     </div>
   )

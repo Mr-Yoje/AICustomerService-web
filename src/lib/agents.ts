@@ -2,6 +2,7 @@
 export function ownerLabel(owner: string): string {
   if (owner === 'main') return '主控 Agent'
   if (owner === 'ops') return '运营子 Agent'
+  if (owner === 'collection') return '催收子 Agent'
   if (owner.startsWith('collection:')) return `催收子 Agent · ${owner.slice('collection:'.length)}`
   return owner
 }
