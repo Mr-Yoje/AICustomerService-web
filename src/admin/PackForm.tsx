@@ -97,7 +97,7 @@ export function PackForm({ draft, set, opts }: { draft: Doc; set: Setter; opts: 
       </Section>
 
       <Section title="主动结束">
-        <Field label="累计拒绝次数" help="会话内客户累计明确拒绝还款达到该次数时，AI 坐席说结束语（话术模板 exit）后主动结束会话，并生成拒绝跟进待办；留空表示不主动结束">
+        <Field label="累计拒绝次数" help="读取业务包 exit.max_refusals。会话内累计拒绝还款达到该次数时主动结束，并生成拒绝跟进待办；留空表示不主动结束">
           <InputNumber
             min={1}
             value={num(exitRule.max_refusals)}
