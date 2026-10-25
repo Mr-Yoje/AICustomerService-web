@@ -693,13 +693,13 @@ export interface components {
             /** Customer Level */
             customer_level: string | null;
             /** Credit Score */
-            credit_score: number | null;
+            credit_score: number | string | null;
             /** Monthly Income */
-            monthly_income: number | null;
+            monthly_income: number | string | null;
             /** Overdue Count */
             overdue_count: number;
             /** Overdue Amount */
-            overdue_amount: number;
+            overdue_amount: number | string;
         };
         /** CustomerDetail */
         CustomerDetail: {
@@ -782,7 +782,7 @@ export interface components {
             /** Loan Type */
             loan_type: string | null;
             /** Overdue Amount */
-            overdue_amount: number;
+            overdue_amount: number | string;
             /** Overdue Days */
             overdue_days: number;
             /** Overdue Periods */
@@ -801,7 +801,7 @@ export interface components {
             /** Items */
             items: components["schemas"]["LoanItem"][];
             /** Total Amount */
-            total_amount: number;
+            total_amount: number | string;
             /** Suggestion */
             suggestion: string;
             /** Basis */

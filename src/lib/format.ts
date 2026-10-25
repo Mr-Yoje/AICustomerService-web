@@ -1,5 +1,6 @@
-export function money(v: number | null | undefined): string {
-  if (v === null || v === undefined) return '—'
+export function money(v: number | string | null | undefined): string {
+  if (v === null || v === undefined || v === '') return '—'
+  if (typeof v !== 'number' || !Number.isFinite(v)) return '** 元'
   return `${v.toLocaleString('zh-CN', { maximumFractionDigits: 2 })} 元`
 }
 
